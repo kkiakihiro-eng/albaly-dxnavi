@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DX診断 | 福岡AI総合研究所 DXナビ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #1565C0;
+  --primary-light: #1E88E5;
+  --primary-dark: #0D47A1;
+  --accent: #00BFA5;
+  --accent-light: #64FFDA;
+  --bg: #F5F7FA;
+  --card: #FFFFFF;
+  --text: #263238;
+  --text-light: #546E7A;
+  --border: #E0E6ED;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --radius: 12px;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
+  color: #fff;
+  padding: 20px 16px 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.02em; }
+.header p { font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
+
+/* Progress Bar */
+.progress-wrap {
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  height: 6px;
+  margin: 12px auto 0;
+  max-width: 320px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--accent-light);
+  border-radius: 4px;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+.step-label {
+  font-size: 0.7rem;
+  margin-top: 6px;
+  opacity: 0.8;
+}
+
+/* Main Container */
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* Step panels */
+.step { display: none; animation: fadeIn 0.4s ease; }
+.step.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 20px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent);
+}
+
+/* Form elements */
+.form-group { margin-bottom: 18px; }
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.form-group label .required {
+  color: #E53935;
+  font-size: 0.75rem;
+  margin-left: 4px;
+}
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #FAFBFC;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
+}
+.form-group select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23546E7A' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+/* Question Card */
+.q-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+  border: 2px solid transparent;
+}
+.q-card.answered { border-color: var(--accent); }
+.q-num {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.q-category {
+  display: inline-block;
+  background: rgba(0,191,165,0.12);
+  color: #00897B;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  margin-left: 4px;
+}
+.q-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.q-scale {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+}
+.q-scale label {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+}
+.q-scale input[type="radio"] { display: none; }
+.q-scale .scale-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 2px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-light);
+  background: #FAFBFC;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.q-scale .scale-btn .label-text {
+  font-size: 0.55rem;
+  font-weight: 400;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+.q-scale input[type="radio"]:checked + .scale-btn {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(21,101,192,0.3);
+}
+.q-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-light);
+  margin-top: 6px;
+  padding: 0 4px;
+}
+
+/* Category divider */
+.category-divider {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary);
+  padding: 14px 0 8px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.category-divider::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(21,101,192,0.3);
+  width: 100%;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(21,101,192,0.4); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-accent {
+  background: linear-gradient(135deg, #00897B, var(--accent));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,191,165,0.3);
+  width: 100%;
+}
+.btn-accent:hover { transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  width: 100%;
+}
+.btn-outline:hover { background: rgba(21,101,192,0.05); }
+
+.btn-group { display: flex; gap: 10px; margin-top: 20px; }
+.btn-group .btn { flex: 1; }
+.btn-back {
+  background: #ECEFF1;
+  color: var(--text-light);
+}
+
+/* Results */
+.result-score {
+  text-align: center;
+  padding: 30px 20px;
+}
+.result-score .score-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(21,101,192,0.3);
+}
+.result-score .score-num { font-size: 3rem; font-weight: 900; line-height: 1; }
+.result-score .score-unit { font-size: 0.9rem; opacity: 0.9; }
+.result-score .score-label {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.result-score .score-desc {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Level badge */
+.level-badge {
+  display: inline-block;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.level-5 { background: #E8F5E9; color: #2E7D32; }
+.level-4 { background: #E3F2FD; color: #1565C0; }
+.level-3 { background: #FFF3E0; color: #E65100; }
+.level-2 { background: #FFF8E1; color: #F57F17; }
+.level-1 { background: #FFEBEE; color: #C62828; }
+
+/* Radar Chart */
+.radar-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+.radar-wrap svg { max-width: 300px; width: 100%; }
+
+/* Category scores */
+.cat-score-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.cat-score-item:last-child { border-bottom: none; }
+.cat-score-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.cat-score-bar-wrap {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cat-score-bar {
+  flex: 1;
+  height: 8px;
+  background: #ECEFF1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.cat-score-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+.cat-score-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* Recommendation card */
+.rec-card {
+  background: linear-gradient(135deg, rgba(21,101,192,0.04), rgba(0,191,165,0.04));
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.rec-card h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.rec-card p {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+.rec-service {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+/* Subsidy banner */
+.subsidy-banner {
+  background: linear-gradient(135deg, #FFF8E1, #FFF3E0);
+  border: 2px solid #FFB300;
+  border-radius: var(--radius);
+  padding: 18px;
+  margin: 16px 0;
+  text-align: center;
+}
+.subsidy-banner .icon { font-size: 1.5rem; margin-bottom: 6px; }
+.subsidy-banner h3 { font-size: 0.95rem; color: #E65100; margin-bottom: 6px; }
+.subsidy-banner p { font-size: 0.8rem; color: #795548; }
+
+/* CTA section */
+.cta-section {
+  text-align: center;
+  padding: 20px 0;
+}
+.cta-section p {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-bottom: 14px;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 24px 16px;
+  font-size: 0.7rem;
+  color: var(--text-light);
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
+}
+.footer a { color: var(--primary); text-decoration: none; }
+
+/* Error */
+.error-msg {
+  color: #E53935;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  display: none;
+}
+.form-group.has-error input,
+.form-group.has-error select { border-color: #E53935; }
+.form-group.has-error .error-msg { display: block; }
+
+/* Print */
+@media print {
+  .header { position: static; }
+  .btn, .cta-section, .footer { display: none; }
+  .step { display: block !important; }
+  body { background: #fff; }
+  .card, .q-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+}
+
+/* Responsive */
+@media (max-width: 400px) {
+  .q-scale .scale-btn { min-height: 46px; font-size: 1rem; }
+  .q-scale .scale-btn .label-text { font-size: 0.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <h1>DX診断</h1>
+  <p>福岡AI総合研究所 DXナビ</p>
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="step-label" id="stepLabel">Step 1 / 3 - 基本情報</div>
+</header>
+
+<div class="container">
+
+  <!-- ====== STEP 1: 基本情報 ====== -->
+  <div class="step active" id="step1">
+    <div class="card">
+      <h2>基本情報を入力してください</h2>
+
+      <div class="form-group">
+        <label>会社名<span class="required">*</span></label>
+        <input type="text" id="companyName" placeholder="例: 株式会社サンプル" autocomplete="organization">
+        <div class="error-msg">会社名を入力してください</div>
+      </div>
+
+      <div class="form-group">
+        <label>担当者名<span class="required">*</span></label>
+        <input type="text" id="personName" placeholder="例: 山田太郎" autocomplete="name">
+        <div class="error-msg">担当者名を入力してください</div>
+      </div>
+
+      <div class="form-group">
+        <label>メールアドレス<span class="required">*</span></label>
+        <input type="email" id="email" placeholder="例: yamada@example.com" autocomplete="email">
+        <div class="error-msg">正しいメールアドレスを入力してください</div>
+      </div>
+
+      <div class="form-group">
+        <label>業種<span class="required">*</span></label>
+        <select id="industry">
+          <option value="">選択してください</option>
+          <option value="建設">建設</option>
+          <option value="製造">製造</option>
+          <option value="小売">小売</option>
+          <option value="飲食">飲食</option>
+          <option value="IT">IT</option>
+          <option value="サービス">サービス</option>
+          <option value="士業">士業</option>
+          <option value="その他">その他</option>
+        </select>
+        <div class="error-msg">業種を選択してください</div>
+      </div>
+
+      <div class="form-group">
+        <label>従業員数<span class="required">*</span></label>
+        <select id="employeeCount">
+          <option value="">選択してください</option>
+          <option value="1-5">1〜5名</option>
+          <option value="6-20">6〜20名</option>
+          <option value="21-50">21〜50名</option>
+          <option value="51-100">51〜100名</option>
+          <option value="101+">101名以上</option>
+        </select>
+        <div class="error-msg">従業員数を選択してください</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="goToStep2()">診断を始める</button>
+  </div>
+
+  <!-- ====== STEP 2: アンケート ====== -->
+  <div class="step" id="step2">
+    <div id="questionsContainer"></div>
+
+    <div id="unansweredMsg" style="display:none; text-align:center; color:#E53935; font-size:0.85rem; margin-bottom:12px;">
+      すべての質問に回答してください
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-back" onclick="goToStep1()">戻る</button>
+      <button class="btn btn-primary" onclick="goToStep3()">結果を見る</button>
+    </div>
+  </div>
+
+  <!-- ====== STEP 3: 結果 ====== -->
+  <div class="step" id="step3">
+
+    <div class="card result-score" id="resultScore"></div>
+
+    <div class="card">
+      <h2>カテゴリ別スコア</h2>
+      <div class="radar-wrap" id="radarWrap"></div>
+      <div id="catScores"></div>
+    </div>
+
+    <div class="card">
+      <h2>改善ポイントと推奨サービス</h2>
+      <div id="recommendations"></div>
+    </div>
+
+    <div class="subsidy-banner">
+      <div class="icon">&#128176;</div>
+      <h3>IT導入補助金のご案内</h3>
+      <p>補助金を活用すれば、DXツールの導入コストを<strong>最大2/3削減</strong>できます。申請から導入まで、福岡AI総合研究所がサポートします。</p>
+    </div>
+
+    <div class="cta-section">
+      <p>専門スタッフが貴社に最適なDX戦略をご提案します</p>
+      <a href="https://fukuoka-ai-lab.jp/contact" target="_blank" class="btn btn-accent" style="text-decoration:none; margin-bottom:12px;">無料相談を予約する</a>
+      <br><br>
+      <button class="btn btn-outline" onclick="shareResults()">結果をURLで共有する</button>
+    </div>
+
+    <div class="btn-group" style="margin-bottom: 0;">
+      <button class="btn btn-back" onclick="resetAll()">最初からやり直す</button>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  &copy; 2026 <a href="https://albaly.jp" target="_blank">株式会社Albaly</a> / <a href="https://fukuoka-ai-lab.jp" target="_blank">福岡AI総合研究所</a>
+</footer>
+
+<script>
+// ========================
+// DATA
+// ========================
+const CATEGORIES = [
+  { key: 'process', name: '業務プロセスのデジタル化', color: '#1565C0' },
+  { key: 'data',    name: 'データ活用',             color: '#00897B' },
+  { key: 'security',name: 'セキュリティ・IT基盤',    color: '#6A1B9A' },
+  { key: 'ai',      name: 'AI・自動化',              color: '#E65100' },
+  { key: 'marketing',name: 'デジタルマーケティング',   color: '#C62828' },
+];
+
+const QUESTIONS = [
+  // A: process
+  { cat: 0, text: '紙の書類・FAXをどの程度使っていますか？', low: '毎日使う', high: 'ほぼ使わない' },
+  { cat: 0, text: '社内の情報共有にどんなツールを使っていますか？', low: '口頭/電話のみ', high: 'Slack等' },
+  { cat: 0, text: '顧客情報はどう管理していますか？', low: '手書き/Excel', high: 'CRM' },
+  { cat: 0, text: '請求書・経理処理はどうしていますか？', low: '手書き', high: 'クラウド会計' },
+  // B: data
+  { cat: 1, text: '売上データを分析していますか？', low: 'していない', high: '定期的に' },
+  { cat: 1, text: '顧客の行動データを取得していますか？', low: 'まったく', high: '詳細に' },
+  { cat: 1, text: 'データに基づいて意思決定していますか？', low: '勘と経験', high: '常に' },
+  { cat: 1, text: 'KPIを設定して追跡していますか？', low: 'していない', high: 'リアルタイム' },
+  // C: security
+  { cat: 2, text: 'パスワード管理はどうしていますか？', low: 'メモ/付箋', high: '管理ツール' },
+  { cat: 2, text: 'データのバックアップは取っていますか？', low: 'していない', high: '自動クラウド' },
+  { cat: 2, text: 'リモートワーク環境はありますか？', low: '不可能', high: '完全対応' },
+  { cat: 2, text: 'IT担当者はいますか？', low: 'いない', high: '専任' },
+  // D: ai
+  { cat: 3, text: '業務でAIツールを使っていますか？', low: 'まったく', high: '日常的に' },
+  { cat: 3, text: '定型業務の自動化をしていますか？', low: 'まったく', high: '大部分' },
+  { cat: 3, text: 'チャットボットや自動応答を導入していますか？', low: 'なし', high: '複数' },
+  { cat: 3, text: 'AI導入に興味がありますか？', low: 'まったくない', high: '非常に' },
+  // E: marketing
+  { cat: 4, text: 'Webサイトを持っていますか？', low: 'ない', high: '定期更新' },
+  { cat: 4, text: 'SNSを運用していますか？', low: 'まったく', high: '複数+定期' },
+  { cat: 4, text: 'Web広告を出していますか？', low: 'していない', high: '最適化運用' },
+  { cat: 4, text: '顧客からのオンライン集客はどの程度ですか？', low: 'ゼロ', high: 'メイン' },
+];
+
+const LEVELS = [
+  { min: 80, label: 'DX先進企業',  desc: 'デジタル活用が進んでおり、さらなる高度化で競争力を強化できます。', cls: 'level-5' },
+  { min: 60, label: 'DX推進中',    desc: 'DXの基盤はできています。弱いカテゴリを強化すれば大きく伸びます。', cls: 'level-4' },
+  { min: 40, label: 'DX初期段階',  desc: '部分的にデジタル化が始まっています。優先順位をつけて進めましょう。', cls: 'level-3' },
+  { min: 20, label: 'DXこれから',   desc: 'デジタル化の余地が大きく、改善効果が最も出やすい段階です。', cls: 'level-2' },
+  { min: 0,  label: 'DX未着手',    desc: '今が始めるベストタイミングです。小さなステップから始めましょう。', cls: 'level-1' },
+];
+
+const SERVICE_MAP = {
+  process:   { name: '福岡バックオフィスくん', desc: 'クラウドツール導入と業務フローの見直しで、紙やFAXから脱却します。' },
+  data:      { name: '福岡AIコンサルくん', desc: 'データ分析基盤の構築とKPI設計で、データドリブンな経営を実現します。' },
+  security:  { name: 'DXナビ（IT導入補助金活用）', desc: 'セキュリティ対策とIT基盤の整備を、補助金を活用してコストを抑えながら実施します。' },
+  ai:        { name: '福岡AIコンサルくん', desc: 'AI導入の企画から運用まで、貴社に最適なAI活用戦略を提案します。' },
+  marketing: { name: '福岡SNSくん / 福岡WEBマーケくん', desc: 'SNS運用やWeb広告の最適化で、オンライン集客を強化します。' },
+};
+
+const IMPROVEMENT_TIPS = {
+  process: [
+    'まずは請求書・経費精算のクラウド化から始めましょう',
+    '社内チャットツール（Slack, Teams等）の導入が情報共有の第一歩です',
+    '顧客情報をExcelからCRMへ移行すると営業効率が大幅に上がります',
+  ],
+  data: [
+    '売上データをダッシュボード化して、毎週チェックする仕組みを作りましょう',
+    'Googleアナリティクスの導入で顧客行動の可視化ができます',
+    'KPIを3つだけ決めて、まずは月次で追跡してみましょう',
+  ],
+  security: [
+    'パスワード管理ツール（1Password等）の導入を最優先にしましょう',
+    'クラウドストレージで自動バックアップ体制を整えましょう',
+    'VPNとクラウド環境で、どこからでも安全に仕事ができる体制を作りましょう',
+  ],
+  ai: [
+    'ChatGPTやClaude等の生成AIを日常業務に取り入れてみましょう',
+    '定型メール・レポート作成の自動化から始めるのが効果的です',
+    'FAQ対応のチャットボット導入で、問い合わせ対応の負担を減らせます',
+  ],
+  marketing: [
+    'まずはGoogleビジネスプロフィールの最適化から始めましょう',
+    'SNSは1つに絞って、週3回の投稿から始めるのがおすすめです',
+    'ホームページの定期更新で検索エンジンからの流入を増やしましょう',
+  ],
+};
+
+// ========================
+// STATE
+// ========================
+let answers = new Array(20).fill(0);
+let basicInfo = {};
+
+// ========================
+// INIT
+// ========================
+document.addEventListener('DOMContentLoaded', () => {
+  buildQuestions();
+  loadFromStorage();
+  loadFromURL();
+});
+
+function buildQuestions() {
+  const container = document.getElementById('questionsContainer');
+  let html = '';
+  let currentCat = -1;
+
+  QUESTIONS.forEach((q, i) => {
+    if (q.cat !== currentCat) {
+      currentCat = q.cat;
+      html += `<div class="category-divider">${CATEGORIES[currentCat].name}</div>`;
+    }
+    html += `
+      <div class="q-card" id="qcard${i}">
+        <span class="q-num">Q${i + 1}</span>
+        <span class="q-category">${CATEGORIES[q.cat].name}</span>
+        <div class="q-text">${q.text}</div>
+        <div class="q-scale">
+          ${[1,2,3,4,5].map(v => `
+            <label>
+              <input type="radio" name="q${i}" value="${v}" onchange="setAnswer(${i}, ${v})">
+              <div class="scale-btn">
+                ${v}
+                <span class="label-text">${v === 1 ? q.low : v === 5 ? q.high : ''}</span>
+              </div>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// ========================
+// NAVIGATION
+// ========================
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(`step${n}`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const bar = document.getElementById('progressBar');
+  const label = document.getElementById('stepLabel');
+  const labels = ['基本情報', 'DX診断アンケート', '診断結果'];
+  bar.style.width = `${(n / 3) * 100}%`;
+  label.textContent = `Step ${n} / 3 - ${labels[n - 1]}`;
+}
+
+function goToStep1() { showStep(1); }
+
+function goToStep2() {
+  if (!validateStep1()) return;
+  saveBasicInfo();
+  showStep(2);
+}
+
+function goToStep3() {
+  const unanswered = answers.filter(a => a === 0).length;
+  if (unanswered > 0) {
+    document.getElementById('unansweredMsg').style.display = 'block';
+    // Scroll to first unanswered
+    const idx = answers.indexOf(0);
+    const el = document.getElementById(`qcard${idx}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  document.getElementById('unansweredMsg').style.display = 'none';
+  saveToStorage();
+  calculateResults();
+  showStep(3);
+}
+
+// ========================
+// VALIDATION
+// ========================
+function validateStep1() {
+  let valid = true;
+  const fields = [
+    { id: 'companyName', check: v => v.trim().length > 0 },
+    { id: 'personName', check: v => v.trim().length > 0 },
+    { id: 'email', check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+    { id: 'industry', check: v => v !== '' },
+    { id: 'employeeCount', check: v => v !== '' },
+  ];
+
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    const group = el.closest('.form-group');
+    if (!f.check(el.value)) {
+      group.classList.add('has-error');
+      valid = false;
+    } else {
+      group.classList.remove('has-error');
+    }
+  });
+
+  return valid;
+}
+
+// ========================
+// ANSWERS
+// ========================
+function setAnswer(idx, val) {
+  answers[idx] = val;
+  const card = document.getElementById(`qcard${idx}`);
+  card.classList.add('answered');
+  document.getElementById('unansweredMsg').style.display = 'none';
+  saveToStorage();
+}
+
+function saveBasicInfo() {
+  basicInfo = {
+    company: document.getElementById('companyName').value.trim(),
+    person: document.getElementById('personName').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    industry: document.getElementById('industry').value,
+    employees: document.getElementById('employeeCount').value,
+  };
+}
+
+// ========================
+// RESULTS CALCULATION
+// ========================
+function calculateResults() {
+  // Category scores (each 0-20, normalized to 0-100%)
+  const catScores = CATEGORIES.map((cat, ci) => {
+    const qs = QUESTIONS.map((q, qi) => q.cat === ci ? answers[qi] : null).filter(v => v !== null);
+    const sum = qs.reduce((a, b) => a + b, 0);
+    const max = qs.length * 5;
+    return { ...cat, sum, max, pct: Math.round((sum / max) * 100) };
+  });
+
+  const totalScore = answers.reduce((a, b) => a + b, 0);
+  const totalMax = 20 * 5;
+  const totalPct = Math.round((totalScore / totalMax) * 100);
+
+  // Level
+  const level = LEVELS.find(l => totalPct >= l.min);
+
+  // Render score
+  renderScore(totalPct, level);
+  renderRadar(catScores);
+  renderCatScores(catScores);
+  renderRecommendations(catScores);
+}
+
+function renderScore(pct, level) {
+  document.getElementById('resultScore').innerHTML = `
+    <div class="score-circle">
+      <span class="score-num">${pct}</span>
+      <span class="score-unit">/ 100点</span>
+    </div>
+    <div>
+      <span class="level-badge ${level.cls}">${level.label}</span>
+    </div>
+    <div class="score-label">${basicInfo.company || '貴社'}のDX診断結果</div>
+    <div class="score-desc">${level.desc}</div>
+  `;
+}
+
+function renderRadar(catScores) {
+  const cx = 150, cy = 150, r = 110;
+  const n = catScores.length;
+  const angleStep = (2 * Math.PI) / n;
+  const startAngle = -Math.PI / 2;
+
+  // Grid rings
+  let gridLines = '';
+  [0.2, 0.4, 0.6, 0.8, 1.0].forEach(ring => {
+    const points = [];
+    for (let i = 0; i < n; i++) {
+      const angle = startAngle + i * angleStep;
+      points.push(`${cx + r * ring * Math.cos(angle)},${cy + r * ring * Math.sin(angle)}`);
+    }
+    gridLines += `<polygon points="${points.join(' ')}" fill="none" stroke="#E0E6ED" stroke-width="1"/>`;
+  });
+
+  // Axis lines
+  let axes = '';
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + i * angleStep;
+    axes += `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(angle)}" y2="${cy + r * Math.sin(angle)}" stroke="#E0E6ED" stroke-width="1"/>`;
+  }
+
+  // Data polygon
+  const dataPoints = catScores.map((c, i) => {
+    const angle = startAngle + i * angleStep;
+    const val = c.pct / 100;
+    return `${cx + r * val * Math.cos(angle)},${cy + r * val * Math.sin(angle)}`;
+  });
+
+  // Labels
+  let labels = '';
+  const labelR = r + 24;
+  catScores.forEach((c, i) => {
+    const angle = startAngle + i * angleStep;
+    const x = cx + labelR * Math.cos(angle);
+    const y = cy + labelR * Math.sin(angle);
+    const shortName = c.name.length > 8 ? c.name.slice(0, 8) + '…' : c.name;
+    let anchor = 'middle';
+    if (Math.cos(angle) > 0.3) anchor = 'start';
+    if (Math.cos(angle) < -0.3) anchor = 'end';
+    labels += `<text x="${x}" y="${y}" text-anchor="${anchor}" dominant-baseline="middle" font-size="10" fill="#546E7A" font-family="'Noto Sans JP',sans-serif">${shortName}</text>`;
+    labels += `<text x="${x}" y="${y + 13}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="${c.color}" font-weight="700" font-family="'Noto Sans JP',sans-serif">${c.pct}%</text>`;
+  });
+
+  // Dots
+  let dots = '';
+  catScores.forEach((c, i) => {
+    const angle = startAngle + i * angleStep;
+    const val = c.pct / 100;
+    dots += `<circle cx="${cx + r * val * Math.cos(angle)}" cy="${cy + r * val * Math.sin(angle)}" r="4" fill="${CATEGORIES[0].color}" stroke="#fff" stroke-width="2"/>`;
+  });
+
+  document.getElementById('radarWrap').innerHTML = `
+    <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+      ${gridLines}
+      ${axes}
+      <polygon points="${dataPoints.join(' ')}" fill="rgba(21,101,192,0.15)" stroke="${CATEGORIES[0].color}" stroke-width="2.5"/>
+      ${dots}
+      ${labels}
+    </svg>
+  `;
+}
+
+function renderCatScores(catScores) {
+  document.getElementById('catScores').innerHTML = catScores.map(c => `
+    <div class="cat-score-item">
+      <div class="cat-score-name">${c.name}</div>
+      <div class="cat-score-bar-wrap">
+        <div class="cat-score-bar">
+          <div class="cat-score-bar-fill" style="width:${c.pct}%; background:${c.color};"></div>
+        </div>
+        <div class="cat-score-val" style="color:${c.color}">${c.pct}%</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRecommendations(catScores) {
+  // Sort by lowest score first
+  const sorted = [...catScores].sort((a, b) => a.pct - b.pct);
+  const recs = sorted.filter(c => c.pct < 80).slice(0, 3);
+
+  if (recs.length === 0) {
+    document.getElementById('recommendations').innerHTML = '<p style="text-align:center; color:var(--text-light);">すべてのカテゴリで高いスコアです。さらなる高度化をご提案します。</p>';
+    return;
+  }
+
+  document.getElementById('recommendations').innerHTML = recs.map(c => {
+    const service = SERVICE_MAP[c.key];
+    const tips = IMPROVEMENT_TIPS[c.key];
+    const tip = tips[Math.min(Math.floor((100 - c.pct) / 30), tips.length - 1)];
+    return `
+      <div class="rec-card">
+        <h4>${c.name}（${c.pct}%）</h4>
+        <p>${tip}</p>
+        <span class="rec-service">${service.name}</span>
+        <p style="margin-top:6px; font-size:0.75rem;">${service.desc}</p>
+      </div>
+    `;
+  }).join('');
+}
+
+// ========================
+// STORAGE
+// ========================
+function saveToStorage() {
+  try {
+    localStorage.setItem('dxnavi_answers', JSON.stringify(answers));
+    localStorage.setItem('dxnavi_basic', JSON.stringify(basicInfo));
+  } catch(e) {}
+}
+
+function loadFromStorage() {
+  try {
+    const savedAnswers = localStorage.getItem('dxnavi_answers');
+    const savedBasic = localStorage.getItem('dxnavi_basic');
+    if (savedAnswers) {
+      answers = JSON.parse(savedAnswers);
+      answers.forEach((v, i) => {
+        if (v > 0) {
+          const radio = document.querySelector(`input[name="q${i}"][value="${v}"]`);
+          if (radio) { radio.checked = true; document.getElementById(`qcard${i}`).classList.add('answered'); }
+        }
+      });
+    }
+    if (savedBasic) {
+      basicInfo = JSON.parse(savedBasic);
+      if (basicInfo.company) document.getElementById('companyName').value = basicInfo.company;
+      if (basicInfo.person) document.getElementById('personName').value = basicInfo.person;
+      if (basicInfo.email) document.getElementById('email').value = basicInfo.email;
+      if (basicInfo.industry) document.getElementById('industry').value = basicInfo.industry;
+      if (basicInfo.employees) document.getElementById('employeeCount').value = basicInfo.employees;
+    }
+  } catch(e) {}
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('r');
+  if (!encoded) return;
+  try {
+    const decoded = atob(encoded);
+    const data = JSON.parse(decoded);
+    if (data.a && data.a.length === 20) {
+      answers = data.a;
+      basicInfo = { company: data.c || '', person: '', email: '', industry: data.i || '', employees: data.e || '' };
+      // Set form values
+      if (basicInfo.company) document.getElementById('companyName').value = basicInfo.company;
+      if (basicInfo.industry) document.getElementById('industry').value = basicInfo.industry;
+      if (basicInfo.employees) document.getElementById('employeeCount').value = basicInfo.employees;
+      // Set radio buttons
+      answers.forEach((v, i) => {
+        if (v > 0) {
+          const radio = document.querySelector(`input[name="q${i}"][value="${v}"]`);
+          if (radio) { radio.checked = true; document.getElementById(`qcard${i}`).classList.add('answered'); }
+        }
+      });
+      // Jump to results
+      calculateResults();
+      showStep(3);
+    }
+  } catch(e) {}
+}
+
+// ========================
+// SHARE
+// ========================
+function shareResults() {
+  const data = { a: answers, c: basicInfo.company, i: basicInfo.industry, e: basicInfo.employees };
+  const encoded = btoa(JSON.stringify(data));
+  const url = `${window.location.origin}${window.location.pathname}?r=${encoded}`;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('結果のURLをコピーしました');
+    });
+  } else {
+    prompt('以下のURLをコピーしてください:', url);
+  }
+}
+
+// ========================
+// RESET
+// ========================
+function resetAll() {
+  answers = new Array(20).fill(0);
+  basicInfo = {};
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.q-card').forEach(c => c.classList.remove('answered'));
+  document.querySelectorAll('.form-group').forEach(g => g.classList.remove('has-error'));
+  document.getElementById('companyName').value = '';
+  document.getElementById('personName').value = '';
+  document.getElementById('email').value = '';
+  document.getElementById('industry').value = '';
+  document.getElementById('employeeCount').value = '';
+  try { localStorage.removeItem('dxnavi_answers'); localStorage.removeItem('dxnavi_basic'); } catch(e) {}
+  // Clear URL params
+  if (window.history.replaceState) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  showStep(1);
+}
+</script>
+
+</body>
+</html>
